@@ -1,69 +1,244 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import Link from 'next/link';
+
+// Mock Data Request Buyer
+const INITIAL_REQUESTS = [
+  {
+    id: 'REQ-000',
+    model: 'Nintendo Switch OLED Joy-Con Red/Blue',
+    merk: 'Nintendo',
+    kuantitas: 1,
+    sellerName: 'Budi (Jasa Titip JP)',
+    country: '🇯🇵 Jepang',
+    // Status Baru: Request diterima seller, belum diproses (diterima/ditolak)
+    status: 'menunggu_proses', // 'diterima' | 'ditolak' | 'pending' | 'dibayar' | 'menunggu_proses'
+    price: 4500000,
+    fee: 450000,
+    shippingFee: 40000,
+  },
+  {
+    id: 'REQ-001',
+    model: 'Matcha Powder Uji Premium 100g',
+    merk: 'Ito En',
+    kuantitas: 2,
+    sellerName: 'Budi (Jasa Titip JP)',
+    country: '🇯🇵 Jepang',
+    status: 'diterima',
+    price: 265000,
+    fee: 26500,
+    shippingFee: 20000,
+  },
+  {
+    id: 'REQ-002',
+    model: 'Sony WH-1000XM5',
+    merk: 'Sony',
+    kuantitas: 1,
+    sellerName: 'Budi (Jasa Titip JP)',
+    country: '🇯🇵 Jepang',
+    status: 'dibayar',
+    price: 3296700,
+    fee: 329670,
+    shippingFee: 35000,
+  },
+  {
+    id: 'REQ-003',
+    model: 'MacBook Air M3',
+    merk: 'Apple',
+    kuantitas: 1,
+    sellerName: 'Siti (SG Express)',
+    country: '🇸🇬 Singapura',
+    status: 'ditolak',
+    price: 15999000,
+    fee: 1599900,
+    shippingFee: 50000,
+  },
+];
+
+const SELLER_TRIPS = [
+  { id: 1, seller: 'Budi Santoso', country: '🇯🇵 Jepang', flag: '🇯🇵', departure: '20 Agustus 2026', returnDate: '28 Agustus 2026', status: 'Aktif' },
+  { id: 2, seller: 'Siti Rahma', country: '🇸🇬 Singapura', flag: '🇸🇬', departure: '22 Agustus 2026', returnDate: '25 Agustus 2026', status: 'Aktif' },
+  { id: 3, seller: 'Andi Wijaya', country: '🇰🇷 Korea Selatan', flag: '🇰🇷', departure: '01 September 2026', returnDate: '10 September 2026', status: 'Mendatang' },
+];
+
+export default function BuyerDashboard() {
+  const [requests] = useState(INITIAL_REQUESTS);
+
+  const formatRupiah = (number: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-6 md:p-10">
+      <div className="max-w-7xl mx-auto space-y-10">
+        
+        {/* Header Dashboard */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-8 bg-white p-6 rounded-2xl shadow-xs">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">Dashboard Buyer</h1>
+            <p className="text-slate-600 mt-1.5 text-lg">Kelola request barang dan pantau jadwal trip seller.</p>
+          </div>
+          <Link
+            href="/request"
+            className="inline-flex items-center justify-center px-6 py-3 bg-brand-green hover:opacity-90 font-semibold rounded-xl text-white transition-all shadow-md active:scale-95 text-lg"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {"+ Buat Request Barang"}
+          </Link>
         </div>
-      </main>
+
+        {/* Status Request Barang Anda */}
+        <div className="space-y-6" id="status">
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Daftar Titipan & Status Request</h2>
+          
+          <div className="space-y-6">
+            {requests.map((item) => {
+              const totalBiaya = item.price + item.fee + item.shippingFee;
+
+              return (
+                <div key={item.id} className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-md flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
+                  
+                  {/* Informasi Barang */}
+                  <div className="flex items-start gap-5 w-full md:w-auto">
+                    <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 font-mono text-xs border border-slate-200 shrink-0">
+                      IMG
+                    </div>
+                    
+                    <div className="grow">
+                      <div className="flex items-center gap-2.5 mb-1.5">
+                        <h3 className="text-xl font-bold text-slate-950 tracking-tight">{item.model}</h3>
+                        <span className="text-sm px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
+                          {`x${item.kuantitas}`}
+                        </span>
+                      </div>
+                      
+                      <p className="text-sm text-slate-600 mt-1">Merk: <span className="text-slate-800 font-medium">{item.merk}</span></p>
+                      <p className="text-sm text-slate-600 mt-1">ID: <span className="font-mono text-slate-500 text-xs">{item.id}</span></p>
+                      
+                      <div className="mt-3 text-sm text-slate-500 space-y-0.5">
+                        <p>Seller: <span className="text-slate-700 font-medium">{item.sellerName}</span></p>
+                        <p>Negara: <span className="text-slate-700 font-medium">{item.country}</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sisi Kanan: Badge Status, Total Harga, & Tombol Aksi */}
+                  <div className="flex flex-col items-start md:items-end gap-3.5 w-full md:w-auto shrink-0">
+                    
+                    {/* Tag Status */}
+                    {item.status === 'menunggu_proses' && (
+                      <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold bg-amber-50 text-amber-700 border border-amber-200 uppercase tracking-wider">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        Request Diterima Seller (Menunggu Tinjauan)
+                      </span>
+                    )}
+                    {item.status === 'diterima' && (
+                      <span className="px-4 py-1.5 rounded-full text-sm font-semibold bg-brand-green-light text-brand-green border border-emerald-200 uppercase tracking-wider">
+                        Disetujui Seller
+                      </span>
+                    )}
+                    {item.status === 'dibayar' && (
+                      <span className="px-4 py-1.5 rounded-full text-sm font-semibold bg-blue-50 text-blue-600 border border-blue-200 uppercase tracking-wider">
+                        Sudah Dibayar
+                      </span>
+                    )}
+                    {item.status === 'ditolak' && (
+                      <span className="px-4 py-1.5 rounded-full text-sm font-semibold bg-rose-50 text-rose-600 border border-rose-100 uppercase tracking-wider">
+                        Ditolak Seller
+                      </span>
+                    )}
+                    {item.status === 'pending' && (
+                      <span className="px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-wider">
+                        Menunggu Respon
+                      </span>
+                    )}
+
+                    {/* Total Biaya */}
+                    <div className="text-left md:text-right mt-1">
+                      <p className="text-sm text-slate-500">Estimasi Total Biaya</p>
+                      <p className="text-3xl font-extrabold text-brand-green tracking-tight">
+                        {formatRupiah(totalBiaya)}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {`Barang: ${formatRupiah(item.price)} • Fee Jastip: ${formatRupiah(item.fee)}`}
+                      </p>
+                    </div>
+
+                    {/* Tombol / Keterangan Aksi Berdasarkan Status */}
+                    <div className="mt-2 w-full md:w-auto">
+                      {item.status === 'menunggu_proses' && (
+                        <p className="text-xs text-amber-800 bg-amber-50/80 px-3 py-2 rounded-lg border border-amber-200/60 text-center md:text-right">
+                          ⏳ Request sudah masuk. Seller sedang meninjau ketersediaan barang.
+                        </p>
+                      )}
+
+                      {item.status === 'diterima' && (
+                        <Link
+                          href="/confirmation"
+                          className="block text-center px-5 py-2.5 bg-brand-green hover:opacity-90 text-white font-semibold rounded-xl text-sm transition-all shadow-sm active:scale-95"
+                        >
+                          ✓ Lihat Konfirmasi Harga & Bayar
+                        </Link>
+                      )}
+
+                      {item.status === 'dibayar' && (
+                        <Link
+                          href="/payment"
+                          className="block text-center px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-sm transition-all shadow-sm active:scale-95"
+                        >
+                          📦 Lacak Status Pesanan
+                        </Link>
+                      )}
+                    </div>
+
+                  </div>
+                
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Jadwal Trip Seller Per Negara */}
+        <div className="bg-white border border-slate-100 rounded-3xl p-8 shadow-md">
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
+            <h2 className="text-2xl font-bold text-slate-950 tracking-tight">Jadwal Trip Seller Per Negara</h2>
+            <span className="text-sm px-4 py-1 rounded-full bg-brand-green-light text-brand-green font-medium">
+              Temukan Jastip Sesuai Kebutuhan Anda
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {SELLER_TRIPS.map((trip) => (
+              <div key={trip.id} className="p-6 bg-brand-green-light border border-emerald-200 rounded-2xl flex flex-col justify-between hover:border-brand-green-pastel transition-all">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-4xl">{trip.flag}</span>
+                    <span className={`text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider ${trip.status === 'Aktif' ? 'bg-emerald-100 text-brand-green' : 'bg-slate-100 text-slate-600'}`}>
+                      {trip.status}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-extrabold text-slate-950 tracking-tight">{trip.country}</h3>
+                  <p className="text-sm text-slate-700 mt-1.5">Seller: <span className="text-slate-950 font-semibold">{trip.seller}</span></p>
+                  
+                  <div className="mt-5 pt-4 border-t border-emerald-200 text-sm text-slate-600 space-y-1.5">
+                    <p>🛫 <span className="font-medium text-slate-800">Berangkat:</span> {trip.departure}</p>
+                    <p>🛬 <span className="font-medium text-slate-800">Kembali:</span> {trip.returnDate}</p>
+                  </div>
+                </div>
+
+                <Link
+                  href={`/request?seller=${encodeURIComponent(trip.seller)}&country=${encodeURIComponent(trip.country)}`}
+                  className="mt-6 w-full py-2.5 bg-white hover:bg-emerald-50 text-brand-green border border-emerald-300 text-center rounded-xl text-sm font-semibold transition-colors inline-block"
+                >
+                  Request ke Seller Ini
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      
+      </div>
     </div>
   );
 }
