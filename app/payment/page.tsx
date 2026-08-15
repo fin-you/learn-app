@@ -3,16 +3,13 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
 
-type OrderStatus = 'diproses' | 'dikirim' | 'sampai';
-
 export default function PaymentPage() {
   const [bankAccount, setBankAccount] = useState('');
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
-  // State alur pembayaran & status
+  // State alur pembayaran
   const [isPaid, setIsPaid] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState<OrderStatus>('diproses');
 
   const totalPayment = 311500; // IDR
 
@@ -41,7 +38,7 @@ export default function PaymentPage() {
         <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-6">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-950 tracking-tight">
-              {isPaid ? 'Status & Lacak Pesanan' : 'Form Pembayaran Buyer'}
+              {isPaid ? 'Status Pesanan' : 'Form Pembayaran Buyer'}
             </h1>
             <p className="text-slate-600 text-sm mt-1">
               {isPaid 
@@ -126,7 +123,7 @@ export default function PaymentPage() {
             </div>
           </form>
         ) : (
-          /* FASE 2: TRACKING STATUS PESANAN */
+          /* FASE 2: STATUS PESANAN */
           <div className="space-y-8">
             
             {/* Banner Sukses Pembayaran */}
@@ -140,78 +137,13 @@ export default function PaymentPage() {
               </div>
             </div>
 
-            {/* TIMELINE STATUS PESANAN */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-bold text-slate-950">Lacak Status Pesanan</h2>
-
-              <div className="grid grid-cols-3 gap-3 relative">
-                
-                {/* Step 1: Pesanan Diproses */}
-                <div
-                  onClick={() => setCurrentStatus('diproses')}
-                  className={`p-4 rounded-2xl border text-center cursor-pointer transition-all ${
-                    currentStatus === 'diproses'
-                      ? 'bg-brand-green-light border-brand-green text-brand-green shadow-sm'
-                      : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="text-2xl mb-1">📦</div>
-                  <p className="text-xs font-bold uppercase tracking-wider">1. Diproses</p>
-                  <p className="text-[11px] mt-0.5">Pesanan Diproses</p>
-                </div>
-
-                {/* Step 2: Pesanan Dikirim */}
-                <div
-                  onClick={() => setCurrentStatus('dikirim')}
-                  className={`p-4 rounded-2xl border text-center cursor-pointer transition-all ${
-                    currentStatus === 'dikirim'
-                      ? 'bg-brand-green-light border-brand-green text-brand-green shadow-sm'
-                      : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="text-2xl mb-1">🛫</div>
-                  <p className="text-xs font-bold uppercase tracking-wider">2. Dikirim</p>
-                  <p className="text-[11px] mt-0.5">Pesanan Dikirim</p>
-                </div>
-
-                {/* Step 3: Pesanan Sampai Rumah */}
-                <div
-                  onClick={() => setCurrentStatus('sampai')}
-                  className={`p-4 rounded-2xl border text-center cursor-pointer transition-all ${
-                    currentStatus === 'sampai'
-                      ? 'bg-brand-green-light border-brand-green text-brand-green shadow-sm'
-                      : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="text-2xl mb-1">🏠</div>
-                  <p className="text-xs font-bold uppercase tracking-wider">3. Selesai</p>
-                  <p className="text-[11px] mt-0.5">Sampai Rumah</p>
-                </div>
-
-              </div>
-            </div>
-
             {/* Rincian Keterangan Status saat ini */}
             <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Detail Status Terakhir</p>
-              {currentStatus === 'diproses' && (
-                <div>
-                  <h4 className="text-base font-bold text-slate-900">Pesanan Sedang Diproses Seller</h4>
-                  <p className="text-sm text-slate-600 mt-0.5">Seller telah mengonfirmasi pembayaran Anda dan sedang membeli barang titipan Anda di luar negeri.</p>
-                </div>
-              )}
-              {currentStatus === 'dikirim' && (
-                <div>
-                  <h4 className="text-base font-bold text-slate-900">Pesanan Dalam Pengiriman</h4>
-                  <p className="text-sm text-slate-600 mt-0.5">Barang sedang dalam perjalanan menuju alamat rumah Anda via kurir ekspedisi. Resi: <span className="font-mono font-bold text-slate-800">JNE-JP-8829102</span></p>
-                </div>
-              )}
-              {currentStatus === 'sampai' && (
-                <div>
-                  <h4 className="text-base font-bold text-brand-green">Pesanan Telah Sampai di Rumah</h4>
-                  <p className="text-sm text-slate-600 mt-0.5">Barang telah berhasil diterima. Terima kasih telah menggunakan layanan Jastip!</p>
-                </div>
-              )}
+              <div>
+                <h4 className="text-base font-bold text-slate-900">Pesanan Sedang Diproses Seller</h4>
+                <p className="text-sm text-slate-600 mt-0.5">admin akan mengonfirmasi pembayaran anda dan seller sedang memproses barang titipan Anda</p>
+              </div>
             </div>
 
             {/* Tombol kembali ke Dashboard */}
