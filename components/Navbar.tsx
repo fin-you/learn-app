@@ -2,16 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUser } from '@/context/UserContext';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { user } = useUser();
 
-  // Mock data user (Bisa diganti dengan data dari context/state/auth)
-  const user = {
-    name: 'test',
-    role: 'Buyer',
-    avatarLetter: 'T',
-  };
+  const displayName = user.fullName || 'test';
+  const roleName = user.role || 'Buyer';
+  const avatarLetter = (displayName.trim().charAt(0).toUpperCase()) || 'T';
 
   const isActive = (path: string) => pathname === path;
 
@@ -70,17 +69,26 @@ export default function Navbar() {
         {/* BAGIAN KANAN: User Profile & Log Out */}
         <div className="flex items-center gap-4">
           <div className="text-right leading-tight">
-            <p className="text-sm font-bold text-slate-900">{user.name}</p>
-            <p className="text-xs text-slate-400 font-medium">{user.role}</p>
+            <p className="text-sm font-bold text-slate-900">{displayName}</p>
+            <p className="text-xs text-slate-400 font-medium">{roleName}</p>
           </div>
 
           {/* Klik Photo Profile untuk berpindah ke halaman edit profile */}
           <Link
             href="/profile"
-            className="w-9 h-9 rounded-full bg-emerald-100/70 text-slate-800 font-medium text-base flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer"
+            className="w-9 h-9 rounded-full bg-emerald-100/70 text-slate-800 font-semibold text-base flex items-center justify-center hover:ring-2 hover:ring-green-400 transition-all cursor-pointer overflow-hidden shrink-0 border border-slate-200"
             title="Edit Profile"
           >
-            {user.avatarLetter}
+            {user.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.avatarUrl}
+                alt={displayName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              avatarLetter
+            )}
           </Link>
 
           <button
