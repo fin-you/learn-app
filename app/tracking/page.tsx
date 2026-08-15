@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -10,7 +11,7 @@ const TRACKING_DATA: Record<string, any> = {
     model: 'Sony WH-1000XM5',
     merk: 'Sony',
     kuantitas: 1,
-    sellerName: 'Budi (Jasa Titip JP)',
+    sellerName: 'Budi Santoso',
     country: '🇯🇵 Jepang',
     courier: 'FedEx Express (International Priority)',
     resi: '7734 9182 0419', // Format standar resi FedEx (12 digit)
@@ -19,6 +20,7 @@ const TRACKING_DATA: Record<string, any> = {
     price: 3296700,
     fee: 329670,
     shippingFee: 35000,
+    photoUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80',
     steps: [
       { id: 1, title: 'Pembayaran Dikonfirmasi', date: '18 Agt 2026, 14:30', status: 'completed' },
       { id: 2, title: 'Shipment Picked Up (FedEx Tokyo)', date: '21 Agt 2026, 11:15', status: 'completed' },
@@ -26,7 +28,6 @@ const TRACKING_DATA: Record<string, any> = {
       { id: 4, title: 'Out for Delivery (FedEx Indonesia)', date: 'Estimasi 26 Agt 2026', status: 'pending' },
       { id: 5, title: 'Delivered', date: '-', status: 'pending' },
     ],
-    // Log riwayat aktivitas pengiriman dari FedEx API
     timelineLogs: [
       { 
         date: '23 Agt 2026 - 08:00 WIB', 
@@ -52,12 +53,38 @@ const TRACKING_DATA: Record<string, any> = {
   }
 };
 
-export default function TrackingPage() {
+function TrackingContent() {
   const searchParams = useSearchParams();
   const reqId = searchParams.get('id') || 'REQ-002';
 
-  // Ambil data berdasarkan ID atau fallback ke REQ-002
-  const data = TRACKING_DATA[reqId] || TRACKING_DATA['REQ-002'];
+  const [data, setData] = useState(TRACKING_DATA[reqId] || TRACKING_DATA['REQ-002']);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('jastip_buyer_requests');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const found = parsed.find((item: any) => item.id === reqId);
+        if (found) {
+          setData((prev: any) => ({
+            ...prev,
+            id: found.id,
+            model: found.model,
+            merk: found.merk,
+            sellerName: found.sellerName || prev.sellerName,
+            country: found.country || prev.country,
+            price: found.price || prev.price,
+            fee: found.fee || prev.fee,
+            shippingFee: found.shippingFee || prev.shippingFee,
+            photoUrl: found.photoUrl || prev.photoUrl,
+          }));
+        }
+      }
+    } catch (e) {
+      console.error('Error loading tracking data:', e);
+    }
+  }, [reqId]);
+
   const totalBiaya = data.price + data.fee + data.shippingFee;
 
   const formatRupiah = (number: number) => {
@@ -80,18 +107,27 @@ export default function TrackingPage() {
 
         {/* Card Header Info Pesanan & FedEx Banner */}
         <div className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div>
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 inline-flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
-                FedEx Express Active Track
-              </span>
-              <span className="text-xs font-mono text-slate-400">ID: {data.id}</span>
+          <div className="flex items-start gap-4">
+            <div className="w-20 h-20 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center shadow-xs">
+              {data.photoUrl ? (
+                <img src={data.photoUrl} alt={data.model} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-3xl">📦</span>
+              )}
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-950 mt-2">{data.model}</h1>
-            <p className="text-sm text-slate-600 mt-1">
-              Seller: <span className="font-medium text-slate-900">{data.sellerName}</span> ({data.country})
-            </p>
+            <div>
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 inline-flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+                  FedEx Express Active Track
+                </span>
+                <span className="text-xs font-mono text-slate-400">ID: {data.id}</span>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-950 mt-1.5">{data.model}</h1>
+              <p className="text-sm text-slate-600 mt-1">
+                Seller: <span className="font-medium text-slate-900">{data.sellerName}</span> ({data.country})
+              </p>
+            </div>
           </div>
 
           <div className="text-left md:text-right border-t md:border-t-0 pt-4 md:pt-0 w-full md:w-auto border-slate-100">
@@ -198,5 +234,13 @@ export default function TrackingPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function TrackingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 p-10 text-center">Loading tracking...</div>}>
+      <TrackingContent />
+    </Suspense>
   );
 }
